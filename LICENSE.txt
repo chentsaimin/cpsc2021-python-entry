@@ -1,7 +1,7 @@
 COPYRIGHT
 
-All contributions by Tsai-Min Chen, Yi-Dar Tang, Huan-Hsin Tseng, Wei Luok Ngu, Le-Yin Hsu, Miao-Chen Chiang, Yu-Te Ku, Ming-Yi Hong, Yu Tsao:
-Copyright (c) 2020 - 2021, Tsai-Min Chen, Yi-Dar Tang, Huan-Hsin Tseng, Wei Luok Ngu, Le-Yin Hsu, Miao-Chen Chiang, Yu-Te Ku, Ming-Yi Hong, Yu Tsao.
+All contributions by Tsai-Min Chen, Yi-Dar Tang, Huan-Hsin Tseng, Chien-Hung Cho, Wei Luok Ngu, Le-Yin Hsu, Miao-Chen Chiang, Yu-Te Ku, Ming-Yi Hong, Yu Tsao:
+Copyright (c) 2020 - 2021, Tsai-Min Chen, Yi-Dar Tang, Huan-Hsin Tseng, Chien-Hung Cho, Wei Luok Ngu, Le-Yin Hsu, Miao-Chen Chiang, Yu-Te Ku, Ming-Yi Hong, Yu Tsao.
 All rights reserved.
 
 All contributions by François Chollet:
