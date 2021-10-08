@@ -195,6 +195,7 @@ def challenge_entry(sample_path):
 
     window_size = 1280
     upperThreshold = 0.9
+    # middleThreshold = 0.7
     lowerThreshold = 0.1
     period = len(ECG)
 #     print(period)
@@ -206,7 +207,7 @@ def challenge_entry(sample_path):
     pred /= ECG.shape[1]
     prediction = np.round(pred[0,-period:,0], 0)
     AFPercentage = np.sum(prediction)/len(prediction)
-    print(AFPercentage) 
+    # print(AFPercentage) 
     if AFPercentage >= upperThreshold:
         end_points = [[0, len(prediction)-1]]
     elif AFPercentage <= lowerThreshold:
@@ -214,18 +215,24 @@ def challenge_entry(sample_path):
     else:
         previous = 0
         for i in range(len(prediction)):
-            if prediction[i] == 1 and previous == 0:
+            if previous == 0 and prediction[i] == 1:
                 end_points.append([i])
                 previous = 1
-            elif prediction[i] == 0 and previous == 1:
-                end_points[-1].append(i)
+            elif previous == 1 and prediction[i] == 0 :
+                end_points[-1].append(i-1)
                 previous = 0
-            else:
-                pass
+
         if previous == 1 :
            end_points[-1].append(len(prediction)-1)
 
-    print(end_points)    
+        # if AFPercentage >= middleThreshold:
+        #    end_points2 = [[end_points[0][0], end_points[-1][-1]]]
+        #    if (end_points2[0][-1] - end_points2[0][0])/len(prediction) >= upperThreshold:
+        #        end_points = [[0, len(prediction)-1]]
+        #    else:
+        #        end_points = end_points2
+
+    # print(end_points)    
     pred_dcit = {'predict_endpoints': end_points}
     
     return pred_dcit
