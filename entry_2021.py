@@ -203,7 +203,7 @@ def challenge_entry(sample_path):
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
     for i in range(ECG.shape[1]):
         temp[0,-period:,0] = ECG[:,i]
-        pred += windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=320)	    
+        pred += np.round(windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=320), 0)
     pred /= ECG.shape[1]
     prediction = np.round(pred[0,-period:,0], 0)
     AFPercentage = np.sum(prediction)/len(prediction)
