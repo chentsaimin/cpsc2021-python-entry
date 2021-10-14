@@ -201,11 +201,16 @@ def challenge_entry(sample_path):
 #     print(period)
     temp = np.zeros((1,((period//window_size)+1)*window_size,1))
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
+    pred2 = np.zeros((1,((period//window_size)+1)*window_size,1))    
     for i in range(ECG.shape[1]):
         temp[0,-period:,0] = ECG[:,i]
-        pred += np.round(windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=320), 0)
+        pred_temp = windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=320)
+        pred += np.round(pred_temp, 0)
+        pred2 += pred_temp
     pred /= ECG.shape[1]
-    prediction = np.round(pred[0,-period:,0], 0)
+    pred2 /= ECG.shape[1]
+    predF = (pred+pred2)/2
+    prediction = np.round(predF[0,-period:,0], 0)
     AFPercentage = np.sum(prediction)/len(prediction)
     # print(AFPercentage) 
     if AFPercentage >= upperThreshold:
