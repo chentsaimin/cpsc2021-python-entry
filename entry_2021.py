@@ -194,9 +194,9 @@ def challenge_entry(sample_path):
     end_points = []
 
     window_size = 1280
-    upperThreshold = 0.9859
+    upperThreshold = 0.999
     # middleThreshold = 0.7
-    lowerThreshold = 0.0393
+    lowerThreshold = 0.001
     period = len(ECG)
 #     print(period)
     temp = np.zeros((1,((period//window_size)+1)*window_size,1))
