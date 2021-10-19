@@ -144,7 +144,16 @@ def MetforNet121(length, num_channels, num_classes):
 sup_model = MetforNet121(window_size, 1, 1)
 sup_model.load_weights('CPSC2021_MetforNet121_1280')
 print(sup_model.summary())
-# sup_model = multi_gpu_model(sup_model, gpus=None, cpu_merge=True, cpu_relocation=False)     
+
+def DenseClassifier(length, num_classes):
+    main_input = Input(shape=(length,), dtype='float32')
+    x = BatchNormalization()(main_input)
+    x = Dense(num_classes)(x)        
+    main_output = Activation('softmax')(x)
+    return Model(inputs=main_input, outputs=main_output)
+class_model = DenseClassifier(3, 3)
+class_model.load_weights('CPSC2021_Dense')
+print(class_model.summary())
 
 def windows_prediction(x_val_from_train, model_sup, filter_size=5200, channel=2, step=75):
     final_outputs_count = np.zeros((x_val_from_train.shape[0],x_val_from_train.shape[1]+(filter_size)*2,channel))
@@ -193,12 +202,10 @@ def challenge_entry(sample_path):
     ECG, _, _ = load_data(sample_path)
     end_points = []
 
-    window_size = 1280
-    upperThreshold = 0.999
-    # middleThreshold = 0.7
-    lowerThreshold = 0.001
+    window_size = 1280 
     period = len(ECG)
 #     print(period)
+
     temp = np.zeros((1,((period//window_size)+1)*window_size,1))
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
     for i in range(ECG.shape[1]):
@@ -206,12 +213,17 @@ def challenge_entry(sample_path):
         pred += windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=80)
     pred /= ECG.shape[1]
     prediction = np.round(pred[0,-period:,0], 0)
-    AFPercentage = np.sum(prediction)/len(prediction)
-    # print(AFPercentage) 
-    if AFPercentage >= upperThreshold:
+
+    pred_sum = np.sum(prediction)
+    pred_length = len(prediction)
+    results = np.argmax(class_model.predict(np.asarray([[pred_length, pred_sum, pred_sum/pred_length]])),axis = 1)[0]
+    # print(results)
+
+    if results == 1:
         end_points = [[0, len(prediction)-1]]
-    elif AFPercentage <= lowerThreshold:
+    elif results == 0:
         end_points = []
+
     else:
         previous = 0
         for i in range(len(prediction)):
@@ -224,6 +236,7 @@ def challenge_entry(sample_path):
 
         if previous == 1 :
            end_points[-1].append(len(prediction)-1)
+
     # print(end_points)    
     pred_dcit = {'predict_endpoints': end_points}
     
@@ -243,4 +256,3 @@ if __name__ == '__main__':
         pred_dict = challenge_entry(sample_path)
 
         save_dict(os.path.join(RESULT_PATH, sample+'.json'), pred_dict)
-
