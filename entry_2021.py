@@ -145,16 +145,6 @@ sup_model = MetforNet121(window_size, 1, 1)
 sup_model.load_weights('CPSC2021_MetforNet121_1280')
 print(sup_model.summary())
 
-def DenseClassifier(length, num_classes):
-    main_input = Input(shape=(length,), dtype='float32')
-    x = BatchNormalization()(main_input)
-    x = Dense(num_classes)(x)        
-    main_output = Activation('softmax')(x)
-    return Model(inputs=main_input, outputs=main_output)
-class_model = DenseClassifier(4, 2)
-class_model.load_weights('CPSC2021_Dense')
-print(class_model.summary())
-
 def windows_prediction(x_val_from_train, model_sup, filter_size=5200, channel=2, step=75):
     final_outputs_count = np.zeros((x_val_from_train.shape[0],x_val_from_train.shape[1]+(filter_size)*2,channel))
     final_outputs_sup = np.zeros((x_val_from_train.shape[0],x_val_from_train.shape[1]+(filter_size)*2,channel))
@@ -202,37 +192,48 @@ def challenge_entry(sample_path):
     ECG, _, _ = load_data(sample_path)
     end_points = []
 
-    window_size = 1280 
-    period = len(ECG)
+    window_size = 1280
     temp = np.zeros((1,((period//window_size)+1)*window_size,1))
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
     for i in range(ECG.shape[1]):
         temp[0,-period:,0] = ECG[:,i]
         pred += windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=80)
-    pred /= ECG.shape[1]   
+    pred /= ECG.shape[1]  
     prediction = np.round(pred[0,-period:,0], 0)
-    tempSum = pred[0,-period:,0].sum()
-    tempSTD = np.std(pred[0,-period:,0])
-    temp_P_Sum = prediction.sum()
-    temp_P_STD = np.std(prediction)
-    results = np.argmax(class_model.predict(np.asarray([[tempSum/period, tempSTD, temp_P_Sum/period, temp_P_STD]])),axis = 1)[0]
-#     print(results)
-    if results == 0:
-        end_points = [[0, period-1]]
-    else:
-        previous = 0
-        for i in range(len(prediction)):
-            if previous == 0 and prediction[i] == 1:
-                end_points.append([i])
-                previous = 1
-            elif previous == 1 and prediction[i] == 0 :
-                end_points[-1].append(i-1)
-                previous = 0
 
-        if previous == 1 :
-           end_points[-1].append(len(prediction)-1)
+    previous = 0
+    for i in range(period):
+        if previous == 0 and prediction[i] == 1:
+            end_points.append([i])
+            previous = 1
+        elif previous == 1 and prediction[i] == 0 :
+            end_points[-1].append(i-1)
+            previous = 0
+    if previous == 1 :
+       end_points[-1].append(period-1)
 
-    # print(end_points)    
+    if len(end_points) >= 2:
+        end_points_temp = []
+        continuous_start = end_points[0][0]
+        for i in range(len(end_points)-1):
+            if end_points[i+1][0] - end_points[i][-1] > window_size:
+                end_points_temp.append([continuous_start, end_points[i][-1]])
+                continuous_start = end_points[i+1][0]
+        end_points_temp.append([continuous_start, end_points[-1][-1]])
+        end_points = end_points_temp
+
+    end_points_temp = []
+    for i in range(len(end_points)):
+        if end_points[i][-1] - end_points[i][0] > window_size:
+            end_points_temp.append(end_points[i])
+    end_points = end_points_temp   
+
+    if len(end_points) >= 1:
+        if end_points[0][0] < window_size:
+            end_points[0][0] = 0
+        if period-1-end_points[-1][-1] < window_size:
+            end_points[-1][-1] = period-1
+
     pred_dcit = {'predict_endpoints': end_points}
     
     return pred_dcit
@@ -251,3 +252,4 @@ if __name__ == '__main__':
         pred_dict = challenge_entry(sample_path)
 
         save_dict(os.path.join(RESULT_PATH, sample+'.json'), pred_dict)
+
