@@ -151,7 +151,7 @@ def DenseClassifier(length, num_classes):
     x = Dense(num_classes)(x)        
     main_output = Activation('softmax')(x)
     return Model(inputs=main_input, outputs=main_output)
-class_model = DenseClassifier(3, 3)
+class_model = DenseClassifier(4, 2)
 class_model.load_weights('CPSC2021_Dense')
 print(class_model.summary())
 
@@ -204,26 +204,21 @@ def challenge_entry(sample_path):
 
     window_size = 1280 
     period = len(ECG)
-#     print(period)
-
     temp = np.zeros((1,((period//window_size)+1)*window_size,1))
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
     for i in range(ECG.shape[1]):
         temp[0,-period:,0] = ECG[:,i]
         pred += windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=80)
-    pred /= ECG.shape[1]
+    pred /= ECG.shape[1]   
     prediction = np.round(pred[0,-period:,0], 0)
-
-    pred_sum = np.sum(prediction)
-    pred_length = len(prediction)
-    results = np.argmax(class_model.predict(np.asarray([[pred_length, pred_sum, pred_sum/pred_length]])),axis = 1)[0]
-    # print(results)
-
-    if results == 1:
-        end_points = [[0, len(prediction)-1]]
-    elif results == 0:
-        end_points = []
-
+    tempSum = pred[0,-period:,0].sum()
+    tempSTD = np.std(pred[0,-period:,0])
+    temp_P_Sum = prediction.sum()
+    temp_P_STD = np.std(prediction)
+    results = np.argmax(class_model.predict(np.asarray([[tempSum/period, tempSTD, temp_P_Sum/period, temp_P_STD]])),axis = 1)[0]
+#     print(results)
+    if results == 0:
+        end_points = [[0, period-1]]
     else:
         previous = 0
         for i in range(len(prediction)):
