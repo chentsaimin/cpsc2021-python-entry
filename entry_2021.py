@@ -193,6 +193,8 @@ def challenge_entry(sample_path):
     end_points = []
 
     window_size = 1280
+    post_size = window_size
+    period = len(ECG)
     temp = np.zeros((1,((period//window_size)+1)*window_size,1))
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
     for i in range(ECG.shape[1]):
@@ -216,7 +218,7 @@ def challenge_entry(sample_path):
         end_points_temp = []
         continuous_start = end_points[0][0]
         for i in range(len(end_points)-1):
-            if end_points[i+1][0] - end_points[i][-1] > window_size:
+            if end_points[i+1][0] - end_points[i][-1] > post_size:
                 end_points_temp.append([continuous_start, end_points[i][-1]])
                 continuous_start = end_points[i+1][0]
         end_points_temp.append([continuous_start, end_points[-1][-1]])
@@ -224,16 +226,16 @@ def challenge_entry(sample_path):
 
     end_points_temp = []
     for i in range(len(end_points)):
-        if end_points[i][-1] - end_points[i][0] > window_size:
+        if end_points[i][-1] - end_points[i][0] > post_size:
             end_points_temp.append(end_points[i])
     end_points = end_points_temp   
 
     if len(end_points) >= 1:
-        if end_points[0][0] < window_size:
+        if end_points[0][0] < post_size:
             end_points[0][0] = 0
-        if period-1-end_points[-1][-1] < window_size:
+        if period-1-end_points[-1][-1] < post_size:
             end_points[-1][-1] = period-1
-
+            
     pred_dcit = {'predict_endpoints': end_points}
     
     return pred_dcit
