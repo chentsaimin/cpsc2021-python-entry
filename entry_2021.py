@@ -241,9 +241,9 @@ def challenge_entry(sample_path):
     # lowerThreshold = 0.05 
     temp_P = np.zeros(prediction.shape)
     for i in range(len(end_points)):
-        temp_P[end_points[i][0]:end_points[i][-1]] = 1
+        temp_P[end_points[i][0]:end_points[i][-1]+1] = 1
     AFPercentage = np.sum(temp_P)/len(temp_P)
-    print(AFPercentage) 
+    # print(AFPercentage) 
 
     if AFPercentage >= upperThreshold:
         end_points = [[0, len(prediction)-1]]
