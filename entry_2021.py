@@ -226,7 +226,7 @@ def challenge_entry(sample_path):
 
     end_points_temp = []
     for i in range(len(end_points)):
-        if end_points[i][-1] - end_points[i][0] > post_size*2:
+        if end_points[i][-1] - end_points[i][0] > post_size:
             end_points_temp.append(end_points[i])
     end_points = end_points_temp   
 
