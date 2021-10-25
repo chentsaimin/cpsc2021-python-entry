@@ -218,7 +218,7 @@ def challenge_entry(sample_path):
         end_points_temp = []
         continuous_start = end_points[0][0]
         for i in range(len(end_points)-1):
-            if end_points[i+1][0] - end_points[i][-1] > post_size*2:
+            if end_points[i+1][0] - end_points[i][-1] > post_size/2:
                 end_points_temp.append([continuous_start, end_points[i][-1]])
                 continuous_start = end_points[i+1][0]
         end_points_temp.append([continuous_start, end_points[-1][-1]])
@@ -237,22 +237,22 @@ def challenge_entry(sample_path):
             end_points[-1][-1] = period-1
 
 
-    upperThreshold = 0.5
-    # lowerThreshold = 0.05 
+    upperThreshold = 0.95
+    lowerThreshold = 0.05 
     temp_P = np.zeros(prediction.shape)
     for i in range(len(end_points)):
         temp_P[end_points[i][0]:end_points[i][-1]+1] = 1
     AFPercentage = np.sum(temp_P)/len(temp_P)
     print(AFPercentage) 
 
-    if len(end_points) >= 2:
-        if AFPercentage >= upperThreshold and end_points[0][0] == 0 and end_points[-1][-1] == period-1:
-                end_points = [[0, period-1]]  
+    # if len(end_points) >= 2:
+    #     if AFPercentage >= upperThreshold and end_points[0][0] == 0 and end_points[-1][-1] == period-1:
+    #             end_points = [[0, period-1]]  
         
-    # if AFPercentage >= upperThreshold:
-    #     end_points = [[0, len(prediction)-1]]
-    # if AFPercentage < lowerThreshold:
-    #     end_points = []
+    if AFPercentage >= upperThreshold:
+        end_points = [[0, len(prediction)-1]]
+    if AFPercentage < lowerThreshold:
+        end_points = []
     print(end_points)        
     pred_dcit = {'predict_endpoints': end_points}
     
