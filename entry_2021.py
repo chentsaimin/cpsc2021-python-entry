@@ -217,7 +217,7 @@ def challenge_entry(sample_path):
         end_points_temp = []
         continuous_start = end_points[0][0]
         for i in range(len(end_points)-1):
-            if end_points[i+1][0] - end_points[i][-1] > post_size/2:
+            if end_points[i+1][0] - end_points[i][-1] > post_size:
                 end_points_temp.append([continuous_start, end_points[i][-1]])
                 continuous_start = end_points[i+1][0]
         end_points_temp.append([continuous_start, end_points[-1][-1]])
