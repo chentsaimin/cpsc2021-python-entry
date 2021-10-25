@@ -28,7 +28,7 @@ fs_ = 200
 random_seed = 42
 num_classes = 1
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3" #Use multi-gpu
-window_size = 1280
+window_size = 80
 
 #model structure
 def dot_product(x, kernel):
@@ -155,11 +155,11 @@ def windows_prediction(x_val_from_train, model_sup, filter_size=5200, channel=2,
         
         x_val_from_train_norm = x_val_from_train_temp2.copy()
         mean = np.mean(x_val_from_train_temp2, axis=1)
-        std = np.std(x_val_from_train_temp2, axis=1)
-        std[std == 0] = np.finfo(float).eps
+        # std = np.std(x_val_from_train_temp2, axis=1)
+        # std[std == 0] = np.finfo(float).eps
         for n in range(filter_size):
             x_val_from_train_norm[:,n,:] = x_val_from_train_norm[:,n,:] - mean
-            x_val_from_train_norm[:,n,:] /= std
+            # x_val_from_train_norm[:,n,:] /= std
         
         sup_answer = model_sup.predict(x_val_from_train_norm)
         sup_answer_temp = np.zeros([x_val_from_train_temp2.shape[0], x_val_from_train_temp2.shape[1], channel])
@@ -192,14 +192,13 @@ def challenge_entry(sample_path):
     ECG, _, _ = load_data(sample_path)
     end_points = []
 
-    window_size = 1280
-    post_size = window_size
+    post_size = window_size*16
     period = len(ECG)
     temp = np.zeros((1,((period//window_size)+1)*window_size,1))
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
     for i in range(ECG.shape[1]):
         temp[0,-period:,0] = ECG[:,i]
-        pred += windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=80)
+        pred += windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=5)
     pred /= ECG.shape[1]  
     prediction = np.round(pred[0,-period:,0], 0)
 
