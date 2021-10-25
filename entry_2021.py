@@ -142,7 +142,7 @@ def MetforNet121(length, num_channels, num_classes):
     main_output = Activation('sigmoid')(x)
     return Model(inputs=main_input, outputs=main_output)
 sup_model = MetforNet121(window_size, 1, 1)
-sup_model.load_weights('CPSC2021_MetforNet121_1280')
+sup_model.load_weights('CPSC2021_MetforNet121_80')
 print(sup_model.summary())
 
 def windows_prediction(x_val_from_train, model_sup, filter_size=5200, channel=2, step=75):
