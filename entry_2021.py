@@ -28,7 +28,7 @@ fs_ = 200
 random_seed = 42
 num_classes = 1
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3" #Use multi-gpu
-window_size = 80
+window_size = 320
 
 #model structure
 def dot_product(x, kernel):
@@ -142,7 +142,7 @@ def MetforNet121(length, num_channels, num_classes):
     main_output = Activation('sigmoid')(x)
     return Model(inputs=main_input, outputs=main_output)
 sup_model = MetforNet121(window_size, 1, 1)
-sup_model.load_weights('CPSC2021_MetforNet121_80')
+sup_model.load_weights('CPSC2021_MetforNet121_'+str(window_size))
 print(sup_model.summary())
 
 def windows_prediction(x_val_from_train, model_sup, filter_size=5200, channel=2, step=75):
@@ -192,7 +192,7 @@ def challenge_entry(sample_path):
     ECG, _, _ = load_data(sample_path)
     end_points = []
 
-    post_size = window_size*16
+    post_size = window_size*4
     period = len(ECG)
     temp = np.zeros((1,((period//window_size)+1)*window_size,1))
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
@@ -217,7 +217,7 @@ def challenge_entry(sample_path):
         end_points_temp = []
         continuous_start = end_points[0][0]
         for i in range(len(end_points)-1):
-            if end_points[i+1][0] - end_points[i][-1] > post_size:
+            if end_points[i+1][0] - end_points[i][-1] > post_size*2:
                 end_points_temp.append([continuous_start, end_points[i][-1]])
                 continuous_start = end_points[i+1][0]
         end_points_temp.append([continuous_start, end_points[-1][-1]])
