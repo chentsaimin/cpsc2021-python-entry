@@ -28,7 +28,7 @@ fs_ = 200
 random_seed = 42
 num_classes = 1
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3" #Use multi-gpu
-window_size = 320
+window_size = 160
 
 #model structure
 def dot_product(x, kernel):
@@ -198,7 +198,7 @@ def challenge_entry(sample_path):
     pred = np.zeros((1,((period//window_size)+1)*window_size,1))
     for i in range(ECG.shape[1]):
         temp[0,-period:,0] = ECG[:,i]
-        pred += windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=20)
+        pred += windows_prediction(temp, sup_model, filter_size=window_size, channel=1, step=10)
     pred /= ECG.shape[1]  
     prediction = np.round(pred[0,-period:,0], 0)
 
